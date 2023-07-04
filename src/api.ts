@@ -2,7 +2,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 export const api = createApi({
     reducerPath: "",
-    baseQuery: fetchBaseQuery({ baseUrl: "http://localhost:8080/api/v1/" }),
+    baseQuery: fetchBaseQuery({ baseUrl: "https://devback-pr-2.onrender.com/api/v1/" }),
     endpoints: (builder) => ({
         getMessages: builder.query<Array<{
             id: number,
