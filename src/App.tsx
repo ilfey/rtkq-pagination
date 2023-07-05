@@ -7,7 +7,7 @@ export function App() {
     const [cursor, setCursor] = useState(0)
     const [isInfinity, setIsInfinity] = useState(false)
 
-    const { data, isLoading, isSuccess, isError } = useGetMessagesQuery(cursor)
+    const { data, isLoading, isError } = useGetMessagesQuery(cursor)
 
     return (
         <>
