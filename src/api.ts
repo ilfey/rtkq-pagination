@@ -15,6 +15,10 @@ export const api = createApi({
             query: ({ cursor, limit, inverse }) => `messages?cursor=${cursor}&limit=${inverse ? limit + '&inverse' : limit}`,
             serializeQueryArgs: ({ endpointName }) => endpointName,
             merge: (currentCache, newItems) => {
+                if (newItems.length === 0) {
+                    return
+                }
+                
                 if (currentCache[0].id > newItems[0].id) {
                     currentCache.unshift(...newItems);
                 } else if (currentCache[0].id < newItems[0].id) {

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { IMessagesRequest, api, useGetMessagesQuery } from './api'
 import Message from './components/Message'
 import { useDispatch } from 'react-redux'
@@ -11,6 +11,7 @@ const
 
 export function App() {
     const [layoutShiftType, setLayoutShiftType] = useState(LOAD_MORE)
+    const [isFetching, setIsFetching] = useState(false)
 
     const dispatch = useDispatch()
 
@@ -20,7 +21,53 @@ export function App() {
         inverse: false,
     })
 
+
     const { data, isLoading, isError } = useGetMessagesQuery(args)
+
+    useEffect(() => {
+        if (isFetching) {
+            setArgs({
+                ...args,
+                ...{
+                    cursor: data === undefined ? 0 : data[0].id,
+                    inverse: false
+                }
+            })
+            setIsFetching(false)
+        }
+    }, [args, data, isFetching])
+    
+
+    useEffect(() => {
+        // if infinity add scroll handler
+        if (layoutShiftType == INFINITY) {
+            window.addEventListener('scroll', onScrollTop)
+
+            return () => {
+                window.removeEventListener('scroll', onScrollTop)
+            }
+        }
+    }, [layoutShiftType])
+
+    // scroll to top handler
+    const onScrollTop = () => {
+        // console.log('window.innerHeight: ', window.innerHeight)
+        // console.log('document.documentElement.scrollHeight: ', document.documentElement.scrollHeight)
+        // console.log('document.documentElement.scrollTop: ', document.documentElement.scrollTop)
+
+        if (document.documentElement.scrollTop < 200) {
+            console.log('fetch old messages')
+            setIsFetching(true)
+        }
+    }
+
+
+    // scroll to down handler
+    // const onScrollDown = () => {
+    //     // console.log('window.innerHeight: ', window.innerHeight)
+    //     // console.log('document.documentElement.scrollHeight: ', document.documentElement.scrollHeight)
+    //     // console.log('document.documentElement.scrollTop: ', document.documentElement.scrollTop)
+    // }
 
     return (
         <>
@@ -35,7 +82,7 @@ export function App() {
                 </p>
 
                 <select className='block mx-auto bg-transparent' value={layoutShiftType} onChange={e => {
-                    const nextLayoutShiftType = e.currentTarget.value  
+                    const nextLayoutShiftType = e.currentTarget.value
                     setLayoutShiftType(nextLayoutShiftType)
                     dispatch(api.util.resetApiState()) // for clear cache
                     if (nextLayoutShiftType === LOAD_MORE_INVERSED) {
@@ -51,7 +98,7 @@ export function App() {
                             inverse: false
                         })
                     }
-                    }}>
+                }}>
                     <option value={LOAD_MORE} className='bg-gray-700'>Load more</option>
                     <option value={LOAD_MORE_INVERSED} className='bg-gray-700'>Load more inversed</option>
                     <option value={INFINITY} className='bg-gray-700'>Infinity</option>
@@ -83,10 +130,10 @@ export function App() {
                     <button className='rounded-md border border-gray-700 p-2  mt-3'
                         onClick={() => setArgs({
                             ...args,
-                            ...{ 
-                                cursor: data === undefined ? 0 : data[data.length-1].id,
+                            ...{
+                                cursor: data === undefined ? 0 : data[data.length - 1].id,
                                 inverse: true
-                             }
+                            }
                         })}>
                         {isError ? 'Retry...' : 'Load more...'}
                     </button>
